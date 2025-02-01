@@ -1,4 +1,4 @@
-import { GridCell, Requirements } from '../components/FoodcubeConfigurator';
+import { GridCell, Requirements } from '../components/types';
 
 export const calculateRequirements = (grid: GridCell[][]): Requirements => {
   const requirements: Requirements = {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { GridCell } from './FoodcubeConfigurator';
+import { GridCell } from './types';
 
 interface GridProps {
   grid: GridCell[][];
