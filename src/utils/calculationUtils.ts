@@ -15,6 +15,10 @@ export const calculateRequirements = (grid: GridCell[][]): Requirements => {
     return row >= 0 && row < 3 && col >= 0 && col < 3 && grid[row][col].hasCube;
   };
 
+  // Calculate total exposed sides for regular and extra tall
+  let totalRegularSides = 0;
+  let totalExtraTallSides = 0;
+
   // Calculate for each cell
   for (let row = 0; row < 3; row++) {
     for (let col = 0; col < 3; col++) {
@@ -35,15 +39,11 @@ export const calculateRequirements = (grid: GridCell[][]): Requirements => {
       if (!adjacentCubes.bottom) exposedSides++;
       if (!adjacentCubes.left) exposedSides++;
 
-      // Calculate cladding packs needed
-      if (exposedSides > 0) {
-        if (grid[row][col].isExtraTall) {
-          requirements.fourPackExtraTall += Math.floor(exposedSides / 4);
-          requirements.twoPackExtraTall += exposedSides % 4;
-        } else {
-          requirements.fourPackRegular += Math.floor(exposedSides / 4);
-          requirements.twoPackRegular += exposedSides % 4;
-        }
+      // Add to total sides based on height
+      if (grid[row][col].isExtraTall) {
+        totalExtraTallSides += exposedSides;
+      } else {
+        totalRegularSides += exposedSides;
       }
 
       // Calculate straight couplings
@@ -62,9 +62,21 @@ export const calculateRequirements = (grid: GridCell[][]): Requirements => {
     }
   }
 
+  // Calculate packs needed for regular height
+  requirements.fourPackRegular = Math.floor(totalRegularSides / 4);
+  const remainingRegularSides = totalRegularSides % 4;
+  requirements.twoPackRegular = Math.ceil(remainingRegularSides / 2);
+
+  // Calculate packs needed for extra tall
+  requirements.fourPackExtraTall = Math.floor(totalExtraTallSides / 4);
+  const remainingExtraTallSides = totalExtraTallSides % 4;
+  requirements.twoPackExtraTall = Math.ceil(remainingExtraTallSides / 2);
+
   // Adjust for double counting of straight couplings
   requirements.straightCouplings = Math.floor(requirements.straightCouplings / 2);
 
+  console.log('Total regular sides:', totalRegularSides);
+  console.log('Total extra tall sides:', totalExtraTallSides);
   console.log('Calculated requirements:', requirements);
   return requirements;
 };
