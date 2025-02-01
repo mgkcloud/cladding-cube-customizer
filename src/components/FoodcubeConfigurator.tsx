@@ -21,8 +21,8 @@ export interface Requirements {
 
 const FoodcubeConfigurator = () => {
   const [grid, setGrid] = useState<GridCell[][]>(
-    Array(9).fill(null).map(() => 
-      Array(9).fill(null).map(() => ({ hasCube: false, isExtraTall: false }))
+    Array(3).fill(null).map(() => 
+      Array(3).fill(null).map(() => ({ hasCube: false, isExtraTall: false }))
     )
   );
   
@@ -57,30 +57,30 @@ const FoodcubeConfigurator = () => {
   };
 
   const applyPreset = (preset: 'straight' | 'L' | 'U') => {
-    const newGrid = Array(9).fill(null).map(() => 
-      Array(9).fill(null).map(() => ({ hasCube: false, isExtraTall: false }))
+    const newGrid = Array(3).fill(null).map(() => 
+      Array(3).fill(null).map(() => ({ hasCube: false, isExtraTall: false }))
     );
 
     switch (preset) {
       case 'straight':
         // Place 3 cubes in a row
         for (let i = 0; i < 3; i++) {
-          newGrid[4][3 + i].hasCube = true;
+          newGrid[1][i].hasCube = true;
         }
         break;
       case 'L':
         // Place cubes in L shape
-        newGrid[4][4].hasCube = true;
-        newGrid[4][5].hasCube = true;
-        newGrid[5][4].hasCube = true;
+        newGrid[1][1].hasCube = true;
+        newGrid[1][2].hasCube = true;
+        newGrid[2][1].hasCube = true;
         break;
       case 'U':
         // Place cubes in U shape
-        newGrid[4][3].hasCube = true;
-        newGrid[4][4].hasCube = true;
-        newGrid[4][5].hasCube = true;
-        newGrid[5][3].hasCube = true;
-        newGrid[5][5].hasCube = true;
+        newGrid[1][0].hasCube = true;
+        newGrid[1][1].hasCube = true;
+        newGrid[1][2].hasCube = true;
+        newGrid[2][0].hasCube = true;
+        newGrid[2][2].hasCube = true;
         break;
     }
 

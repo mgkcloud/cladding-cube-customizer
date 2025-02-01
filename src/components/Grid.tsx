@@ -9,7 +9,7 @@ interface GridProps {
 
 export const Grid: React.FC<GridProps> = ({ grid, onToggleCell, onToggleHeight }) => {
   return (
-    <div className="grid grid-cols-9 gap-1 bg-gray-100 p-4 rounded-lg">
+    <div className="grid grid-cols-3 gap-1 bg-gray-100 p-4 rounded-lg">
       {grid.map((row, rowIndex) => (
         row.map((cell, colIndex) => (
           <div 
