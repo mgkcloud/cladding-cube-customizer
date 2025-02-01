@@ -69,18 +69,22 @@ const FoodcubeConfigurator = () => {
         }
         break;
       case 'L':
-        // Place cubes in L shape
-        newGrid[1][1].hasCube = true;
-        newGrid[1][2].hasCube = true;
+        // Place cubes in L shape along the edges
+        newGrid[0][0].hasCube = true;
+        newGrid[1][0].hasCube = true;
+        newGrid[2][0].hasCube = true;
         newGrid[2][1].hasCube = true;
+        newGrid[2][2].hasCube = true;
         break;
       case 'U':
-        // Place cubes in U shape
+        // Place cubes in U shape along the edges
+        newGrid[0][0].hasCube = true;
         newGrid[1][0].hasCube = true;
-        newGrid[1][1].hasCube = true;
-        newGrid[1][2].hasCube = true;
         newGrid[2][0].hasCube = true;
+        newGrid[2][1].hasCube = true;
         newGrid[2][2].hasCube = true;
+        newGrid[1][2].hasCube = true;
+        newGrid[0][2].hasCube = true;
         break;
     }
 
