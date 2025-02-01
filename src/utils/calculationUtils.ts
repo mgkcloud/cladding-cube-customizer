@@ -12,12 +12,12 @@ export const calculateRequirements = (grid: GridCell[][]): Requirements => {
 
   // Helper to check if a cell has a cube
   const hasCubeAt = (row: number, col: number) => {
-    return row >= 0 && row < 9 && col >= 0 && col < 9 && grid[row][col].hasCube;
+    return row >= 0 && row < 3 && col >= 0 && col < 3 && grid[row][col].hasCube;
   };
 
   // Calculate for each cell
-  for (let row = 0; row < 9; row++) {
-    for (let col = 0; col < 9; col++) {
+  for (let row = 0; row < 3; row++) {
+    for (let col = 0; col < 3; col++) {
       if (!grid[row][col].hasCube) continue;
 
       // Count exposed sides for cladding
