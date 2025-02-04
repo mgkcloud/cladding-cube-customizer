@@ -46,33 +46,22 @@ export const calculateRequirements = (grid: GridCell[][]): Requirements => {
         totalRegularSides += exposedSides;
       }
 
-      // Calculate straight couplings and corner connectors
-      // For each adjacent cube, we need to determine if it forms part of a straight line or a corner
-      
-      // Check horizontal connections (straight couplings)
-      if (adjacentCubes.right) {
-        requirements.straightCouplings++;
-      }
-      
-      // Check vertical connections (straight couplings)
-      if (adjacentCubes.bottom) {
-        requirements.straightCouplings++;
-      }
+      // First, identify corners
+      const corners = [];
+      if (adjacentCubes.right && adjacentCubes.bottom) corners.push('rightBottom');
+      if (adjacentCubes.bottom && adjacentCubes.left) corners.push('bottomLeft');
+      if (adjacentCubes.left && adjacentCubes.top) corners.push('leftTop');
+      if (adjacentCubes.top && adjacentCubes.right) corners.push('topRight');
 
-      // Calculate corner connectors
-      // A corner is formed when we have two adjacent cubes at 90 degrees
-      // We only need one corner connector at each corner
-      if (adjacentCubes.right && adjacentCubes.bottom) {
-        requirements.cornerConnectors++;
+      // Add corner connectors
+      requirements.cornerConnectors += corners.length;
+
+      // Add straight couplings for non-corner connections
+      if (adjacentCubes.right && !corners.includes('rightBottom') && !corners.includes('topRight')) {
+        requirements.straightCouplings++;
       }
-      if (adjacentCubes.bottom && adjacentCubes.left) {
-        requirements.cornerConnectors++;
-      }
-      if (adjacentCubes.left && adjacentCubes.top) {
-        requirements.cornerConnectors++;
-      }
-      if (adjacentCubes.top && adjacentCubes.right) {
-        requirements.cornerConnectors++;
+      if (adjacentCubes.bottom && !corners.includes('rightBottom') && !corners.includes('bottomLeft')) {
+        requirements.straightCouplings++;
       }
     }
   }
@@ -86,9 +75,6 @@ export const calculateRequirements = (grid: GridCell[][]): Requirements => {
   requirements.fourPackExtraTall = Math.floor(totalExtraTallSides / 4);
   const remainingExtraTallSides = totalExtraTallSides % 4;
   requirements.twoPackExtraTall = Math.ceil(remainingExtraTallSides / 2);
-
-  // No need to adjust straight couplings count as we're counting them directly now
-  // Each connection point is counted only once
 
   console.log('Total regular sides:', totalRegularSides);
   console.log('Total extra tall sides:', totalExtraTallSides);
