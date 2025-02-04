@@ -17,11 +17,11 @@ export const CladdingVisualizer = ({ cell, onToggle, isEdgeExposed }: CladdingVi
           <div
             key={edge}
             className={cn(
-              'absolute bg-primary/20 pointer-events-auto hover:bg-primary/40 cursor-pointer',
+              'absolute bg-primary/40 pointer-events-auto hover:bg-primary/60 cursor-pointer',
               {
                 'bg-destructive/40 hover:bg-destructive/60': cell.claddingEdges.has(edge),
-                'w-1/3 h-1': ['top', 'bottom'].includes(edge),
-                'h-1/3 w-1': ['left', 'right'].includes(edge),
+                'w-2/3 h-2': ['top', 'bottom'].includes(edge),
+                'h-2/3 w-2': ['left', 'right'].includes(edge),
                 'top-0': edge === 'top',
                 'bottom-0': edge === 'bottom',
                 'left-0': edge === 'left',

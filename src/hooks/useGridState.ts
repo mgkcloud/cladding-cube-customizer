@@ -54,11 +54,16 @@ const useGridState = () => {
     });
   }, []);
 
-  const applyPreset = useCallback((preset: GridCell[][]) => {
+  const applyPreset = useCallback((preset: any[][]) => {
+    if (!Array.isArray(preset) || !preset.every(row => Array.isArray(row))) {
+      console.error('Invalid preset format:', preset);
+      return;
+    }
+
     setGrid(preset.map(row => 
       row.map(cell => ({
-        ...cell,
-        claddingEdges: new Set()
+        hasCube: cell?.hasCube ?? false,
+        claddingEdges: cell?.claddingEdges ? new Set(cell.claddingEdges) : new Set()
       }))
     ));
   }, []);

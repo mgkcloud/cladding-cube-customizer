@@ -18,7 +18,7 @@ export const Grid: React.FC<GridProps> = ({ grid, onToggleCell, onToggleCladding
             className={`
               relative aspect-square cursor-pointer
               ${cell.hasCube 
-                ? 'bg-blue-500 hover:bg-blue-600' 
+                ? 'bg-gray-500 hover:bg-gray-600' 
                 : 'bg-white hover:bg-gray-200'
               }
               border-2 border-gray-300 rounded
