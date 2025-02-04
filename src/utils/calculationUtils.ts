@@ -56,11 +56,11 @@ export const calculateRequirements = (grid: GridCell[][]): Requirements => {
       // Add corner connectors
       requirements.cornerConnectors += corners.length;
 
-      // Add straight couplings for non-corner connections
-      if (adjacentCubes.right && !corners.includes('rightBottom') && !corners.includes('topRight')) {
+      // Add straight couplings for connections, excluding where corner connectors are used
+      if (adjacentCubes.right && !corners.some(corner => corner.includes('right'))) {
         requirements.straightCouplings++;
       }
-      if (adjacentCubes.bottom && !corners.includes('rightBottom') && !corners.includes('bottomLeft')) {
+      if (adjacentCubes.bottom && !corners.some(corner => corner.includes('bottom'))) {
         requirements.straightCouplings++;
       }
     }
