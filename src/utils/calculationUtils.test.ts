@@ -16,7 +16,7 @@ const logGridState = (grid: GridCell[][], testName: string) => {
 describe('calculateRequirements', () => {
   const createEmptyGrid = (): GridCell[][] => {
     return Array(3).fill(null).map(() => 
-      Array(3).fill(null).map(() => ({ hasCube: false, isExtraTall: false }))
+      Array(3).fill(null).map(() => ({ hasCube: false, claddingEdges: new Set() }))
     );
   };
 

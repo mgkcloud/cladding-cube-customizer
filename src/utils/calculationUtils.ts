@@ -2,6 +2,25 @@ import { GridCell, Requirements } from '../components/types';
 
 const GRID_SIZE = 3;
 
+const hasAdjacentCube = (grid: GridCell[][], row: number, col: number, direction: string) => {
+  const hasCubeAt = (r: number, c: number) => {
+    return r >= 0 && r < grid.length && c >= 0 && c < grid[0].length && grid[r][c].hasCube;
+  };
+
+  switch (direction) {
+    case 'top':
+      return hasCubeAt(row - 1, col);
+    case 'right':
+      return hasCubeAt(row, col + 1);
+    case 'bottom':
+      return hasCubeAt(row + 1, col);
+    case 'left':
+      return hasCubeAt(row, col - 1);
+    default:
+      throw new Error(`Invalid direction: ${direction}`);
+  }
+};
+
 export const calculateRequirements = (grid: GridCell[][]): Requirements => {
   const requirements: Requirements = {
     fourPackRegular: 0,
@@ -15,6 +34,22 @@ export const calculateRequirements = (grid: GridCell[][]): Requirements => {
     return row >= 0 && row < GRID_SIZE && col >= 0 && col < GRID_SIZE && grid[row][col].hasCube;
   };
 
+  // Helper to check if a cell has an adjacent cube
+  const hasAdjacentCube = (grid: GridCell[][], row: number, col: number, direction: string) => {
+    switch (direction) {
+      case 'top':
+        return hasCubeAt(row - 1, col);
+      case 'right':
+        return hasCubeAt(row, col + 1);
+      case 'bottom':
+        return hasCubeAt(row + 1, col);
+      case 'left':
+        return hasCubeAt(row, col - 1);
+      default:
+        throw new Error(`Invalid direction: ${direction}`);
+    }
+  };
+
   // Calculate total exposed sides for regular height
   let totalRegularSides = 0;
 
@@ -23,25 +58,8 @@ export const calculateRequirements = (grid: GridCell[][]): Requirements => {
     for (let col = 0; col < GRID_SIZE; col++) {
       if (!grid[row][col].hasCube) continue;
 
-      const adjacentCubes = {
-        top: hasCubeAt(row - 1, col),
-        right: hasCubeAt(row, col + 1),
-        bottom: hasCubeAt(row + 1, col),
-        left: hasCubeAt(row, col - 1)
-      };
-
-      // Count exposed sides for cladding
-      let exposedSides = 4; // Start with all sides exposed
-      
-      // Count unexposed sides (connected to other cubes)
-      let unexposedSides = 0;
-      if (adjacentCubes.top) unexposedSides++;
-      if (adjacentCubes.right) unexposedSides++;
-      if (adjacentCubes.bottom) unexposedSides++;
-      if (adjacentCubes.left) unexposedSides++;
-      
-      // Calculate exposed sides
-      exposedSides = 4 - unexposedSides;
+      // Calculate exposed sides for cladding
+      const exposedSides = calculateExposedSides(grid, row, col);
       
       // Add to total sides
       totalRegularSides += exposedSides;
@@ -50,10 +68,10 @@ export const calculateRequirements = (grid: GridCell[][]): Requirements => {
       let cornerCount = 0;
       
       // Count corners first
-      if (adjacentCubes.right && adjacentCubes.bottom) cornerCount++;
-      if (adjacentCubes.bottom && adjacentCubes.left) cornerCount++;
-      if (adjacentCubes.left && adjacentCubes.top) cornerCount++;
-      if (adjacentCubes.top && adjacentCubes.right) cornerCount++;
+      if (hasAdjacentCube(grid, row, col, 'right') && hasAdjacentCube(grid, row, col, 'bottom')) cornerCount++;
+      if (hasAdjacentCube(grid, row, col, 'bottom') && hasAdjacentCube(grid, row, col, 'left')) cornerCount++;
+      if (hasAdjacentCube(grid, row, col, 'left') && hasAdjacentCube(grid, row, col, 'top')) cornerCount++;
+      if (hasAdjacentCube(grid, row, col, 'top') && hasAdjacentCube(grid, row, col, 'right')) cornerCount++;
       
       // Add corner connectors
       requirements.cornerConnectors += cornerCount;
@@ -62,10 +80,10 @@ export const calculateRequirements = (grid: GridCell[][]): Requirements => {
       let straightConnections = 0;
       
       // For each direction, count as straight if it's not part of a corner
-      if (adjacentCubes.right && !adjacentCubes.bottom && !adjacentCubes.top) straightConnections++;
-      if (adjacentCubes.bottom && !adjacentCubes.left && !adjacentCubes.right) straightConnections++;
-      if (adjacentCubes.left && !adjacentCubes.top && !adjacentCubes.bottom) straightConnections++;
-      if (adjacentCubes.top && !adjacentCubes.right && !adjacentCubes.left) straightConnections++;
+      if (hasAdjacentCube(grid, row, col, 'right') && !hasAdjacentCube(grid, row, col, 'bottom') && !hasAdjacentCube(grid, row, col, 'top')) straightConnections++;
+      if (hasAdjacentCube(grid, row, col, 'bottom') && !hasAdjacentCube(grid, row, col, 'left') && !hasAdjacentCube(grid, row, col, 'right')) straightConnections++;
+      if (hasAdjacentCube(grid, row, col, 'left') && !hasAdjacentCube(grid, row, col, 'top') && !hasAdjacentCube(grid, row, col, 'bottom')) straightConnections++;
+      if (hasAdjacentCube(grid, row, col, 'top') && !hasAdjacentCube(grid, row, col, 'right') && !hasAdjacentCube(grid, row, col, 'left')) straightConnections++;
       
       // Add straight couplings
       requirements.straightCouplings += straightConnections;
@@ -89,3 +107,20 @@ export const calculateRequirements = (grid: GridCell[][]): Requirements => {
   console.log('Calculated requirements:', requirements);
   return requirements;
 };
+
+function calculateExposedSides(
+  grid: GridCell[][],
+  row: number,
+  col: number
+): number {
+  const cell = grid[row][col];
+  let exposed = 4 - cell.claddingEdges.size;
+  
+  // Existing adjacency checks remain unchanged
+  if (hasAdjacentCube(grid, row, col, 'top')) exposed--;
+  if (hasAdjacentCube(grid, row, col, 'right')) exposed--;
+  if (hasAdjacentCube(grid, row, col, 'bottom')) exposed--;
+  if (hasAdjacentCube(grid, row, col, 'left')) exposed--;
+
+  return Math.max(exposed, 0);
+}

@@ -5,7 +5,7 @@ import { Summary } from './Summary';
 import useGridState from '@/hooks/useGridState';
 
 const FoodcubeConfigurator = () => {
-  const { grid, requirements, toggleCell, toggleHeight, applyPreset } = useGridState();
+  const { grid, requirements, toggleCell, toggleCladding, applyPreset } = useGridState();
 
   const handleSelect = () => {
     // Update Shopify variant quantities based on requirements
@@ -46,7 +46,7 @@ const FoodcubeConfigurator = () => {
           <Grid 
             grid={grid} 
             onToggleCell={toggleCell} 
-            onToggleHeight={toggleHeight} 
+            onToggleCladding={toggleCladding} 
           />
         </div>
         <div>
