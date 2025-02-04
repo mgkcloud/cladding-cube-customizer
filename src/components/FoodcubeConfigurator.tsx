@@ -2,7 +2,7 @@ import React from 'react';
 import { Grid } from './Grid';
 import { PresetConfigs } from './PresetConfigs';
 import { Summary } from './Summary';
-import { useGridState } from '@/hooks/useGridState';
+import useGridState from '@/hooks/useGridState';
 
 const FoodcubeConfigurator = () => {
   const { grid, requirements, toggleCell, toggleHeight, applyPreset } = useGridState();

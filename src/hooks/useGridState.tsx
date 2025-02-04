@@ -3,7 +3,7 @@ import { GridCell, Requirements } from '@/components/types';
 import { calculateRequirements } from '@/utils/calculationUtils';
 import { toast } from '@/hooks/use-toast';
 
-export const useGridState = () => {
+function useGridState() {
   const [grid, setGrid] = useState<GridCell[][]>(
     Array(3).fill(null).map(() => 
       Array(3).fill(null).map(() => ({ hasCube: false, isExtraTall: false }))
@@ -87,4 +87,6 @@ export const useGridState = () => {
     toggleHeight,
     applyPreset
   };
-};
+}
+
+export default useGridState;
