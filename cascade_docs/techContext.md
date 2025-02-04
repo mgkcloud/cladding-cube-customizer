@@ -25,6 +25,13 @@ export interface GridCell {
   hasCube: boolean;
   claddingEdges: Set<'top' | 'right' | 'bottom' | 'left'>;
 }
+
+// Preset System
+const PRESETS = {
+  straight: GridCell[][]; // Linear configuration
+  L: GridCell[][]; // L-shaped configuration
+  U: GridCell[][]; // U-shaped configuration
+};
 ```
 
 ### State Management

@@ -6,12 +6,14 @@
    - Cube placement and removal
    - Cladding edge visualization
    - Requirement calculations
+   - Preset configurations
 
 2. User Interface
-   - Interactive grid cells
-   - Clickable cladding edges
-   - Visual feedback for states
+   - Interactive grid cells with improved colors
+   - Enhanced cladding edge visibility
+   - Clear visual feedback states
    - Mobile-responsive design
+   - Refined hover interactions
 
 3. Integration
    - Shopify cart integration

@@ -4,34 +4,26 @@ import { PresetConfigs } from './PresetConfigs';
 import { Summary } from './Summary';
 import useGridState from '@/hooks/useGridState';
 
-const FoodcubeConfigurator = () => {
+interface FoodcubeConfiguratorProps {
+  variants: Record<string, any>;
+  onUpdate: (selections: Record<string, number>) => void;
+}
+
+export const FoodcubeConfigurator: React.FC<FoodcubeConfiguratorProps> = ({ variants, onUpdate }) => {
   const { grid, requirements, toggleCell, toggleCladding, applyPreset } = useGridState();
 
   const handleSelect = () => {
-    // Update Shopify variant quantities based on requirements
-    const variants = {
-      "44592702292276": requirements.fourPackRegular,
-      "44592702390580": requirements.fourPackExtraTall,
-      "44592713171252": requirements.twoPackRegular,
-      "44592713204020": requirements.twoPackExtraTall,
-      "46691832561972": requirements.cornerConnectors,
-      "43711665668404": requirements.straightCouplings
+    const selections = {
+      fourPackRegular: requirements.fourPackRegular,
+      fourPackExtraTall: requirements.fourPackExtraTall,
+      twoPackRegular: requirements.twoPackRegular,
+      twoPackExtraTall: requirements.twoPackExtraTall,
+      cornerConnectors: requirements.cornerConnectors,
+      straightCouplings: requirements.straightCouplings
     };
 
-    Object.entries(variants).forEach(([variantId, quantity]) => {
-      const variantElement = document.querySelector(
-        `product-customizer-variant[variant-id="${variantId}"]`
-      );
-      if (variantElement) {
-        const input = variantElement.querySelector('quantity-input input');
-        if (input) {
-          (input as HTMLInputElement).value = quantity.toString();
-          input.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-      }
-    });
-
-    console.log('Updated variant quantities:', variants);
+    onUpdate(selections);
+    console.log('Updated selections:', selections);
   };
 
   return (

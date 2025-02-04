@@ -19,4 +19,27 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  define: {
+    'process.env.NODE_ENV': JSON.stringify(mode)
+  },
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true,
+    lib: {
+      entry: path.resolve(__dirname, 'src/embed.tsx'),
+      name: 'FoodcubeConfigurator',
+      formats: ['iife'],
+      fileName: 'foodcube-configurator',
+    },
+    rollupOptions: {
+      output: {
+        globals: {
+          react: 'React',
+          'react-dom': 'ReactDOM',
+        },
+      },
+    },
+    minify: true,
+    sourcemap: true,
+  },
 }));

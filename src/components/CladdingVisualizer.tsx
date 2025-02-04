@@ -17,7 +17,7 @@ export const CladdingVisualizer = ({ cell, onToggle, isEdgeExposed }: CladdingVi
           <div
             key={edge}
             className={cn(
-              'absolute bg-primary/40 pointer-events-auto hover:bg-primary/60 cursor-pointer',
+              'absolute bg-white/40 pointer-events-auto hover:bg-white/90 cursor-pointer',
               {
                 'bg-destructive/40 hover:bg-destructive/60': cell.claddingEdges.has(edge),
                 'w-2/3 h-2': ['top', 'bottom'].includes(edge),
