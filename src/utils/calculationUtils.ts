@@ -15,7 +15,6 @@ export const calculateRequirements = (grid: GridCell[][]): Requirements => {
     return row >= 0 && row < 3 && col >= 0 && col < 3 && grid[row][col].hasCube;
   };
 
-  // Calculate total exposed sides for regular and extra tall
   let totalRegularSides = 0;
   let totalExtraTallSides = 0;
 
@@ -46,13 +45,13 @@ export const calculateRequirements = (grid: GridCell[][]): Requirements => {
         totalRegularSides += exposedSides;
       }
 
-      // Identify corner connections
+      // Check for corner configurations
       if (adjacentCubes.right && adjacentCubes.bottom) {
         requirements.cornerConnectors++;
-        // Only add one straight coupling for this corner (the other connection uses the corner connector)
+        // When we have a corner, we only need one straight coupling
         requirements.straightCouplings++;
       } else {
-        // Add straight couplings for non-corner connections
+        // For non-corner connections, add straight couplings
         if (adjacentCubes.right) requirements.straightCouplings++;
         if (adjacentCubes.bottom) requirements.straightCouplings++;
       }
