@@ -5,7 +5,8 @@
    - 3x3 grid implementation
    - Cube placement and removal
    - Cladding edge visualization
-   - Requirement calculations
+   - Accurate coupling calculations
+   - Panel requirement calculations
    - Preset configurations
 
 2. User Interface
@@ -22,6 +23,7 @@
 
 ## Pending Work
 1. Visual Enhancements
+   - Coupling visualization
    - Edge hover effects
    - State transition animations
    - Loading states
@@ -42,6 +44,7 @@
 ## Quality Metrics
 1. Test Coverage
    - Core calculation logic: 100%
+   - Coupling calculations: 100%
    - Component rendering: In progress
    - Integration tests: Pending
 

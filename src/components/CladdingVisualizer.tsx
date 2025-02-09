@@ -16,6 +16,8 @@ export const CladdingVisualizer = ({ cell, onToggle, isEdgeExposed }: CladdingVi
         {(['top', 'right', 'bottom', 'left'] as const).map((edge) => isEdgeExposed[edge] && (
           <div
             key={edge}
+            data-testid="cladding-edge"
+            data-edge={edge}
             className={cn(
               'absolute bg-white/40 pointer-events-auto hover:bg-white/90 cursor-pointer',
               {

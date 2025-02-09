@@ -1,27 +1,13 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { GridCell } from './types';
-
-const createEmptyCell = (): GridCell => ({
-  hasCube: false,
-  claddingEdges: new Set()
-});
-
-const createCubeCell = (): GridCell => ({
-  hasCube: true,
-  claddingEdges: new Set()
-});
+import { generateStraightPreset, generateLShapePreset, generateUShapePreset } from '@/utils/presetGenerators';
+import { addCladdingToExposedEdges } from '@/utils/presetTransformers';
 
 const PRESETS = {
-  straight: Array(3).fill(null).map(() =>
-    Array(3).fill(null).map((_, j) => j === 1 ? createCubeCell() : createEmptyCell())
-  ),
-  L: Array(3).fill(null).map((_, i) =>
-    Array(3).fill(null).map((_, j) => (i === 1 && j <= 1) || (i === 2 && j === 1) ? createCubeCell() : createEmptyCell())
-  ),
-  U: Array(3).fill(null).map((_, i) =>
-    Array(3).fill(null).map((_, j) => (i === 2) || (i === 1 && (j === 0 || j === 2)) ? createCubeCell() : createEmptyCell())
-  )
+  straight: addCladdingToExposedEdges(generateStraightPreset()),
+  L: addCladdingToExposedEdges(generateLShapePreset()),
+  U: addCladdingToExposedEdges(generateUShapePreset())
 } as const;
 
 interface PresetConfigsProps {
@@ -30,21 +16,24 @@ interface PresetConfigsProps {
 
 export const PresetConfigs: React.FC<PresetConfigsProps> = ({ onApply }) => {
   return (
-    <div className="flex gap-4 mb-4">
+    <div className="flex flex-wrap gap-4">
       <Button 
         variant="outline"
+        className='text-xs md:text-sm font-semibold bg-white '
         onClick={() => onApply(PRESETS.straight)}
       >
         Straight (3x1)
       </Button>
       <Button 
         variant="outline"
+        className='text-xs md:text-sm font-semibold bg-white'
         onClick={() => onApply(PRESETS.L)}
       >
         L-Shape
       </Button>
       <Button 
         variant="outline"
+        className='text-xs md:text-sm font-semibold bg-white'
         onClick={() => onApply(PRESETS.U)}
       >
         U-Shape

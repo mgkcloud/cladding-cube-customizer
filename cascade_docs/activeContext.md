@@ -1,43 +1,46 @@
 # Active Context
 
 ## Current Focus
-Refining the UI and fixing preset functionality:
-- Fixed preset application system
-- Updated UI colors and styling
-- Enhanced cladding visualization
-- Improved error handling
+Verifying and improving coupling calculations:
+- Testing coupling calculation accuracy
+- Validating connection detection logic
+- Ensuring consistent behavior across configurations
+- Maintaining test coverage
 
 ## Recent Changes
-1. Visual Updates
-   - Changed cube color to gray (was blue)
-   - Enhanced cladding edge visibility
-   - Increased cladding edge size for better UX
-   - Updated hover states for better feedback
+1. Coupling Calculation Updates
+   - Fixed coupling calculation in connectionDetector.ts
+   - Implemented tracking of processed connections
+   - Added prevention of duplicate counting
+   - Enhanced corner connection detection
 
-2. Preset System Fix
-   - Improved preset data structure
-   - Added validation for preset application
-   - Fixed type safety issues
-   - Enhanced error handling
+2. Test Suite Improvements
+   - Added comprehensive coupling test cases
+   - Implemented various grid configurations
+   - Verified corner connector counting
+   - Added edge case scenarios
 
-3. Component Refinements
-   - Updated CladdingVisualizer styling
-   - Improved Grid component aesthetics
-   - Enhanced visual feedback for interactions
-   - Fixed edge cases in preset handling
+3. State Management Updates
+   - Fixed toggleCell behavior in useGridState
+   - Improved cladding state management
+   - Enhanced adjacent cube handling
+   - Updated state propagation logic
 
 ## Next Steps
-1. Potential Improvements
-   - Add visual feedback for non-exposed edges
-   - Consider animation for state changes
-   - Add undo/redo functionality
+1. Testing Expansion
+   - Add more complex grid configurations
+   - Test larger cube arrangements
+   - Verify edge case handling
+   - Add performance tests for large grids
 
-2. Testing
-   - Add tests for cladding visualization
-   - Test edge cases in grid configurations
-   - Verify calculation accuracy with cladding
+2. Documentation Updates
+   - Document coupling calculation logic
+   - Add coupling visualization guidelines
+   - Update test coverage documentation
+   - Create coupling behavior reference
 
-3. Documentation
-   - Update user documentation
-   - Add developer guidelines
-   - Document cladding visualization patterns
+3. Future Enhancements
+   - Consider visual coupling indicators
+   - Add coupling validation feedback
+   - Optimize connection detection
+   - Enhance error reporting

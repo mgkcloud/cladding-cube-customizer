@@ -14,6 +14,10 @@ const logGridState = (grid: GridCell[][], testName: string) => {
 };
 
 describe('calculateRequirements', () => {
+  // Helper to add cladding to a cube
+  const addCladding = (grid: GridCell[][], row: number, col: number, edges: ('top' | 'right' | 'bottom' | 'left')[]) => {
+    edges.forEach(edge => grid[row][col].claddingEdges.add(edge));
+  };
   const createEmptyGrid = (): GridCell[][] => {
     return Array(3).fill(null).map(() => 
       Array(3).fill(null).map(() => ({ hasCube: false, claddingEdges: new Set() }))
@@ -42,45 +46,74 @@ describe('calculateRequirements', () => {
     console.log('\nCalculated Requirements:', result);
   };
 
-  test('single cube', () => {
+  test('single cube with all edges cladded', () => {
     const grid = createEmptyGrid();
     setCube(grid, 1, 1); // Center cube
+    addCladding(grid, 1, 1, ['top', 'right', 'bottom', 'left']);
     const result = calculateRequirements(grid);
-    logTestCase('Single Cube', grid, result);
+    logTestCase('Single Cube All Edges', grid, result);
+    // Single cube with 4 edges should use exactly one 4-pack
     expect(result).toEqual({
-      fourPackRegular: 1,
+      fourPackRegular: 1,     // 1 four-pack (2 side + 1 left + 1 right)
+      fourPackExtraTall: 0,
       twoPackRegular: 0,
+      twoPackExtraTall: 0,
+      leftPanels: 0,          // All used in four-pack
+      rightPanels: 0,         // All used in four-pack
+      sidePanels: 0,          // All used in four-pack
       cornerConnectors: 0,
       straightCouplings: 0
     });
   });
 
-  test('two adjacent cubes - horizontal', () => {
+  test('three cubes in a line with cladding', () => {
     const grid = createEmptyGrid();
+    // Set up three cubes in a row
     setCube(grid, 1, 0);
     setCube(grid, 1, 1);
+    setCube(grid, 1, 2);
+    // Add cladding to connect them
+    addCladding(grid, 1, 0, ['left', 'right']);
+    addCladding(grid, 1, 1, ['left', 'right']);
+    addCladding(grid, 1, 2, ['left', 'right']);
     const result = calculateRequirements(grid);
-    logTestCase('Two Adjacent Cubes - Horizontal', grid, result);
+    logTestCase('Three Cubes Line', grid, result);
+    // Three cubes in line with 8 edges total
     expect(result).toEqual({
-      fourPackRegular: 1,
-      twoPackRegular: 1,
+      fourPackRegular: 1,     // 1 four-pack (2 side + 1 left + 1 right)
+      fourPackExtraTall: 0,
+      twoPackRegular: 2,     // 2 two-packs for remaining 4 sides
+      twoPackExtraTall: 0,
+      leftPanels: 0,          // Used in four-pack
+      rightPanels: 0,         // Used in four-pack
+      sidePanels: 0,          // All used in packs
       cornerConnectors: 0,
-      straightCouplings: 1
+      straightCouplings: 2     // 2 straight connections
     });
   });
 
-  test('L-shaped configuration', () => {
+  test('L-shaped configuration with cladding', () => {
     const grid = createEmptyGrid();
     setCube(grid, 1, 1); // Center
     setCube(grid, 1, 2); // Right
     setCube(grid, 2, 1); // Bottom
+    // Add cladding to the L-shape
+    addCladding(grid, 1, 1, ['right', 'bottom']);
+    addCladding(grid, 1, 2, ['left']);
+    addCladding(grid, 2, 1, ['top']);
     const result = calculateRequirements(grid);
     logTestCase('L-shaped Configuration', grid, result);
+    // L-shaped with 8 edges total
     expect(result).toEqual({
-      fourPackRegular: 2,
-      twoPackRegular: 0,
-      cornerConnectors: 1,
-      straightCouplings: 1
+      fourPackRegular: 1,     // 1 four-pack (2 side + 1 left + 1 right)
+      fourPackExtraTall: 0,
+      twoPackRegular: 2,     // 2 two-packs for remaining sides
+      twoPackExtraTall: 0,
+      leftPanels: 1,          // 1 extra left panel
+      rightPanels: 0,         // Used in four-pack
+      sidePanels: 0,          // All used in packs
+      cornerConnectors: 1,     // 1 L-connection
+      straightCouplings: 1     // 1 straight connection
     });
   });
 
@@ -93,11 +126,17 @@ describe('calculateRequirements', () => {
     setCube(grid, 1, 2); // Middle right
     const result = calculateRequirements(grid);
     logTestCase('U-shaped Configuration', grid, result);
+    // U-shaped with 12 edges total
     expect(result).toEqual({
-      fourPackRegular: 3,
-      twoPackRegular: 0,
-      cornerConnectors: 2,
-      straightCouplings: 2
+      fourPackRegular: 1,     // 1 four-pack (2 side + 1 left + 1 right)
+      fourPackExtraTall: 0,
+      twoPackRegular: 2,     // 2 two-packs for remaining sides
+      twoPackExtraTall: 0,
+      leftPanels: 2,          // 2 extra left panels
+      rightPanels: 2,         // 2 extra right panels
+      sidePanels: 0,          // All used in packs
+      cornerConnectors: 2,     // 2 corner connections
+      straightCouplings: 2     // 2 straight connections
     });
   });
 
@@ -111,11 +150,17 @@ describe('calculateRequirements', () => {
     setCube(grid, 2, 1); // Bottom
     const result = calculateRequirements(grid);
     logTestCase('All Corners Configuration', grid, result);
+    // Plus shape with 12 edges total
     expect(result).toEqual({
-      fourPackRegular: 3,
-      twoPackRegular: 0,
-      cornerConnectors: 4,
-      straightCouplings: 2
+      fourPackRegular: 1,     // 1 four-pack (2 side + 1 left + 1 right)
+      fourPackExtraTall: 0,
+      twoPackRegular: 2,     // 2 two-packs for remaining sides
+      twoPackExtraTall: 0,
+      leftPanels: 2,          // 2 extra left panels
+      rightPanels: 2,         // 2 extra right panels
+      sidePanels: 0,          // All used in packs
+      cornerConnectors: 4,     // 4 corner connections in plus shape
+      straightCouplings: 2     // 2 straight connections
     });
   });
 });

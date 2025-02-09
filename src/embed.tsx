@@ -31,8 +31,10 @@ document.addEventListener("DOMContentLoaded", () => {
     let variantData = {};
     try {
       const jsonScript = calculator?.querySelector("script[type=\"application/json\"]");
+      console.log('Found JSON script:', jsonScript?.textContent);
       if (jsonScript?.textContent) {
         variantData = JSON.parse(jsonScript.textContent);
+        console.log('Parsed variant data:', variantData);
       }
     } catch (error) {
       console.error('Error parsing variant data:', error);
