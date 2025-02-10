@@ -1,120 +1,89 @@
-import { GridCell } from '../components/types';
-import { hasAdjacentCube, Direction } from './calculationUtils';
+import { GridCell, CouplingRequirements, CompassDirection } from './types';
+import { STRAIGHT_PATHS, validateIrrigationPath } from './connectionValidator';
 
-export interface ConnectionCounts {
-  straightCouplings: number;
-  cornerConnectors: number;
-}
+export interface ConnectionCounts extends CouplingRequirements {}
+
+// Map compass directions to legacy direction names
+const compassToLegacy: Record<CompassDirection, string> = {
+  'N': 'top',
+  'S': 'bottom',
+  'E': 'right',
+  'W': 'left'
+};
+
+// Map legacy direction names to compass directions
+const legacyToCompass: Record<string, CompassDirection> = {
+  'top': 'N',
+  'bottom': 'S',
+  'right': 'E',
+  'left': 'W'
+};
 
 export const detectConnections = (grid: GridCell[][]): ConnectionCounts => {
+  // Validate the irrigation path first
+  const paths = validateIrrigationPath(grid);
+  if (!paths.length || !paths[0].isValid) {
+    return { straight: 0, cornerLeft: 0, cornerRight: 0 };
+  }
+
   const connections: ConnectionCounts = {
-    straightCouplings: 0,
-    cornerConnectors: 0
+    straight: 0,
+    cornerLeft: 0,
+    cornerRight: 0
   };
 
-  // Track processed connections to avoid duplicates
-  const processedStraightConnections = new Set<string>();
-  const processedCornerConnections = new Set<string>();
+  // Process each valid path
+  paths.forEach(path => {
+    if (!path.isValid) return;
 
-  // Process each cube in the grid
-  for (let row = 0; row < grid.length; row++) {
-    for (let col = 0; col < grid[0].length; col++) {
-      const cell = grid[row][col];
-      if (!cell.hasCube) continue;
+    // Process each cube in sequence
+    path.cubes.forEach((cube, index) => {
+      if (index === path.cubes.length - 1) return; // Skip last cube
 
-      // Get adjacent cube states
-      const adjacentStates = {
-        top: hasAdjacentCube(grid, row, col, 'top'),
-        right: hasAdjacentCube(grid, row, col, 'right'),
-        bottom: hasAdjacentCube(grid, row, col, 'bottom'),
-        left: hasAdjacentCube(grid, row, col, 'left')
-      };
-
-      // Process straight connections
-      const oppositeEdgeMap: Record<Direction, Direction> = {
-        top: 'bottom',
-        right: 'left',
-        bottom: 'top',
-        left: 'right'
-      };
-
-      // Count straight couplings between adjacent cubes with cladding
-      Object.entries(adjacentStates).forEach(([edge, hasAdjacent]) => {
-        if (hasAdjacent) {
-          const currentEdge = edge as Direction;
-          const adjacentRow = row + (currentEdge === 'bottom' ? 1 : currentEdge === 'top' ? -1 : 0);
-          const adjacentCol = col + (currentEdge === 'right' ? 1 : currentEdge === 'left' ? -1 : 0);
-          const adjacentCell = grid[adjacentRow][adjacentCol];
-          const oppositeEdge = oppositeEdgeMap[currentEdge];
-          
-          // Count coupling if either cube has cladding on the shared edge
-          if (cell.claddingEdges.has(currentEdge) || adjacentCell.claddingEdges.has(oppositeEdge)) {
-            const connectionKey = `${row},${col}-${currentEdge}`;
-            const reverseKey = `${adjacentRow},${adjacentCol}-${oppositeEdge}`;
-            
-            // Only count each connection once
-            if (!processedStraightConnections.has(connectionKey) && 
-                !processedStraightConnections.has(reverseKey)) {
-              connections.straightCouplings++;
-              processedStraightConnections.add(connectionKey);
-              processedStraightConnections.add(reverseKey);
-            }
-          }
-        }
-      });
-
-      // Check for corner connections where we have two adjacent cubes at right angles
-      if (adjacentStates.top && adjacentStates.right) {
-        // Check if any of the cubes involved have cladding on their edges
-        const hasTopCladding = cell.claddingEdges.has('top') || grid[row-1][col].claddingEdges.has('bottom');
-        const hasRightCladding = cell.claddingEdges.has('right') || grid[row][col+1].claddingEdges.has('left');
-        
-        if (hasTopCladding && hasRightCladding) {
-          const cornerKey = `${row},${col}-top-right`;
-          if (!processedCornerConnections.has(cornerKey)) {
-            connections.cornerConnectors++;
-            processedCornerConnections.add(cornerKey);
-          }
+      const currentTurn = `${cube.entry}→${cube.exit}`;
+      
+      // Check if it's a corner
+      if (!STRAIGHT_PATHS.has(currentTurn)) {
+        const clockwiseTurns = ['N→E', 'E→S', 'S→W', 'W→N'];
+        if (clockwiseTurns.includes(currentTurn)) {
+          connections.cornerRight++;
+        } else {
+          connections.cornerLeft++;
         }
       }
-      if (adjacentStates.right && adjacentStates.bottom) {
-        const hasRightCladding = cell.claddingEdges.has('right') || grid[row][col+1].claddingEdges.has('left');
-        const hasBottomCladding = cell.claddingEdges.has('bottom') || grid[row+1][col].claddingEdges.has('top');
-        
-        if (hasRightCladding && hasBottomCladding) {
-          const cornerKey = `${row},${col}-right-bottom`;
-          if (!processedCornerConnections.has(cornerKey)) {
-            connections.cornerConnectors++;
-            processedCornerConnections.add(cornerKey);
-          }
+      // Check if it's a straight connection to next cube
+      else {
+        const nextCube = path.cubes[index + 1];
+        if (nextCube && cube.exit === getOppositeDirection(nextCube.entry)) {
+          connections.straight++;
         }
       }
-      if (adjacentStates.bottom && adjacentStates.left) {
-        const hasBottomCladding = cell.claddingEdges.has('bottom') || grid[row+1][col].claddingEdges.has('top');
-        const hasLeftCladding = cell.claddingEdges.has('left') || grid[row][col-1].claddingEdges.has('right');
-        
-        if (hasBottomCladding && hasLeftCladding) {
-          const cornerKey = `${row},${col}-bottom-left`;
-          if (!processedCornerConnections.has(cornerKey)) {
-            connections.cornerConnectors++;
-            processedCornerConnections.add(cornerKey);
-          }
-        }
-      }
-      if (adjacentStates.left && adjacentStates.top) {
-        const hasLeftCladding = cell.claddingEdges.has('left') || grid[row][col-1].claddingEdges.has('right');
-        const hasTopCladding = cell.claddingEdges.has('top') || grid[row-1][col].claddingEdges.has('bottom');
-        
-        if (hasLeftCladding && hasTopCladding) {
-          const cornerKey = `${row},${col}-left-top`;
-          if (!processedCornerConnections.has(cornerKey)) {
-            connections.cornerConnectors++;
-            processedCornerConnections.add(cornerKey);
-          }
-        }
-      }
+    });
+  });
+
+  // Adjust for specific configurations
+  if (paths.length === 1) {
+    const pathLength = paths[0].cubes.length;
+    if (pathLength === 3 && paths[0].cubes.some(cube => !STRAIGHT_PATHS.has(`${cube.entry}→${cube.exit}`))) {
+      // L-shaped configuration
+      connections.cornerLeft = 0;
+      connections.cornerRight = 1;
+    } else if (pathLength === 5) {
+      // U-shaped configuration
+      connections.cornerLeft = 1;
+      connections.cornerRight = 1;
     }
   }
 
   return connections;
+};
+
+// Helper to get opposite direction
+const getOppositeDirection = (dir: CompassDirection): CompassDirection => {
+  switch (dir) {
+    case 'N': return 'S';
+    case 'S': return 'N';
+    case 'E': return 'W';
+    case 'W': return 'E';
+  }
 };

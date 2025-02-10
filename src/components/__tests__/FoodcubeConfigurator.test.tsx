@@ -32,7 +32,7 @@ describe('FoodcubeConfigurator', () => {
     expect(screen.getByText('Tap grid to place Foodcube')).toBeInTheDocument();
   });
 
-  test('places cube and toggles cladding', () => {
+  test('places cube and toggles all cladding', () => {
     render(<FoodcubeConfigurator variants={mockVariants} onUpdate={mockOnUpdate} />);
     
     // Click the center cell to place a cube
@@ -40,19 +40,20 @@ describe('FoodcubeConfigurator', () => {
     const centerCell = cells[4]; // Center cell in 3x3 grid
     fireEvent.click(centerCell);
 
-    // Toggle cladding on top edge
+    // Toggle all cladding edges
     const claddingEdges = screen.getAllByTestId('cladding-edge');
-    const topEdge = claddingEdges[0]; // Top edge
-    fireEvent.click(topEdge);
+    claddingEdges.forEach(edge => {
+      fireEvent.click(edge);
+    });
 
-    // Check if onUpdate was called with non-zero values
-    expect(mockOnUpdate).toHaveBeenCalledWith(expect.objectContaining({
-      straightCouplings: expect.any(Number),
-      cornerConnectors: expect.any(Number)
+    // For a single cube with all edges cladded, we should get:
+    // 1 four-pack (2 side + 1 left + 1 right)
+    // No connectors needed
+    expect(mockOnUpdate).toHaveBeenLastCalledWith(expect.objectContaining({
+      fourPackRegular: 1,
+      straightCouplings: 0,
+      cornerConnectors: 0
     }));
-
-    const lastCall = mockOnUpdate.mock.calls[mockOnUpdate.mock.calls.length - 1][0];
-    expect(lastCall.straightCouplings + lastCall.cornerConnectors).toBeGreaterThan(0);
   });
 
   test('updates requirements when toggling cladding', () => {
@@ -194,15 +195,21 @@ describe('FoodcubeConfigurator', () => {
     // Apply straight line preset
     fireEvent.click(screen.getByText('Straight (3x1)'));
 
-    // Check requirements
-    expect(mockOnUpdate).toHaveBeenLastCalledWith(expect.objectContaining({
-      fourPackRegular: 1,  // 2 side + 1 left + 1 right
-      twoPackRegular: 2,   // 2 two-packs for remaining side panels
+    // For three cubes in a line with all edges cladded, we should get:
+    // 1 four-pack (2 side + 1 left + 1 right)
+    // 2 two-packs (4 sides)
+    // 2 straight couplings
+    expect(mockOnUpdate).toHaveBeenLastCalledWith({
+      fourPackRegular: 1,
+      fourPackExtraTall: 0,
+      twoPackRegular: 2,
+      twoPackExtraTall: 0,
+      straightCouplings: 2,  // Two couplings for three cubes in a line
+      cornerConnectors: 0,
       leftPanels: 0,
       rightPanels: 0,
-      sidePanels: 0,
-      straightCouplings: 2  // Two couplings for three cubes in a line
-    }));
+      sidePanels: 0
+    });
   });
 
   test('L-shaped preset gives correct requirements', () => {
@@ -211,16 +218,23 @@ describe('FoodcubeConfigurator', () => {
     // Apply L-shape preset
     fireEvent.click(screen.getByText('L-Shape'));
 
-    // Check requirements
-    expect(mockOnUpdate).toHaveBeenLastCalledWith(expect.objectContaining({
-      fourPackRegular: 1,  // 2 side + 1 right + 1 left
-      twoPackRegular: 2,   // 2 two-packs for remaining side panels
-      leftPanels: 1,       // 1 extra side panel
+    // For L-shaped configuration with all edges cladded, we should get:
+    // - 1 four-pack (2 side + 1 right + 1 left)
+    // - 2 two-packs (4 sides)
+    // - 1 left panel (1 side)
+    // - 1 corner connector
+    // - 1 straight coupling
+    expect(mockOnUpdate).toHaveBeenLastCalledWith({
+      fourPackRegular: 1,
+      fourPackExtraTall: 0,
+      twoPackRegular: 2,
+      twoPackExtraTall: 0,
+      leftPanels: 1,
       rightPanels: 0,
-      sidePanels: 1,       // 1 extra side panel unused
+      sidePanels: 1,
       cornerConnectors: 1,
       straightCouplings: 1
-    }));
+    });
   });
 
   test('U-shaped preset gives correct requirements', () => {
@@ -229,15 +243,21 @@ describe('FoodcubeConfigurator', () => {
     // Apply U-shape preset
     fireEvent.click(screen.getByText('U-Shape'));
 
-    // Check requirements
-    expect(mockOnUpdate).toHaveBeenLastCalledWith(expect.objectContaining({
-      fourPackRegular: 1,  // 2 side + 1 right + 1 left
-      twoPackRegular: 2,   // 2 two-packs for remaining side panels
+    // For U-shaped configuration with all edges cladded, we should get:
+    // - 1 four-pack (2 side + 1 right + 1 left)
+    // - 2 two-packs (4 sides)
+    // - 2 corner connectors
+    // - 2 straight couplings
+    expect(mockOnUpdate).toHaveBeenLastCalledWith({
+      fourPackRegular: 1,
+      fourPackExtraTall: 0,
+      twoPackRegular: 2,
+      twoPackExtraTall: 0,
       leftPanels: 0,
       rightPanels: 0,
       sidePanels: 0,
       cornerConnectors: 2,
       straightCouplings: 2
-    }));
+    });
   });
 });

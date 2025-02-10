@@ -8,7 +8,11 @@ const initializeGrid = (): GridCell[][] => {
   return Array(GRID_SIZE).fill(null).map(() =>
     Array(GRID_SIZE).fill(null).map(() => ({
       hasCube: false,
-      claddingEdges: new Set()
+      claddingEdges: new Set(),
+      connections: {
+        entry: null,
+        exit: null
+      }
     }))
   );
 };
@@ -29,42 +33,78 @@ const useGridState = () => {
 
   const toggleCell = useCallback((row: number, col: number) => {
     setGrid(prev => {
-      const newGrid = prev.map(r => r.map(cell => ({ ...cell, claddingEdges: new Set(cell.claddingEdges) })));
+      const newGrid = prev.map(r => r.map(cell => ({ 
+        ...cell, 
+        claddingEdges: new Set(cell.claddingEdges),
+        connections: { ...cell.connections }
+      })));
       
       // If we're adding a cube
       if (!prev[row][col].hasCube) {
         // Add cladding to all exposed edges
-        const exposedEdges = new Set<'top' | 'right' | 'bottom' | 'left'>();
-        ['top', 'right', 'bottom', 'left'].forEach(edge => {
-          if (!hasAdjacentCube(prev, row, col, edge as 'top' | 'right' | 'bottom' | 'left')) {
-            exposedEdges.add(edge as 'top' | 'right' | 'bottom' | 'left');
+        const exposedEdges = new Set<'N' | 'E' | 'S' | 'W'>();
+        ['N', 'E', 'S', 'W'].forEach(edge => {
+          if (!hasAdjacentCube(prev, row, col, edge)) {
+            exposedEdges.add(edge as 'N' | 'E' | 'S' | 'W');
           }
         });
         
         newGrid[row][col] = {
-          ...prev[row][col],
           hasCube: true,
-          claddingEdges: exposedEdges
+          claddingEdges: exposedEdges,
+          connections: {
+            entry: null,
+            exit: null
+          }
         };
+
+        // Update connections for adjacent cubes
+        const adjacentPositions = [
+          { r: row-1, c: col, direction: 'S' as const },
+          { r: row+1, c: col, direction: 'N' as const },
+          { r: row, c: col-1, direction: 'E' as const },
+          { r: row, c: col+1, direction: 'W' as const }
+        ];
+
+        let connectedCubes = adjacentPositions.filter(({ r, c }) => 
+          r >= 0 && r < GRID_SIZE && c >= 0 && c < GRID_SIZE && newGrid[r][c].hasCube
+        );
+
+        // If exactly two adjacent cubes, set up connections
+        if (connectedCubes.length === 2) {
+          const [first, second] = connectedCubes;
+          newGrid[row][col].connections = {
+            entry: first.direction,
+            exit: second.direction
+          };
+        }
       } else {
-        // If removing a cube, update adjacent cubes' cladding
+        // If removing a cube, update adjacent cubes' cladding and connections
         newGrid[row][col] = {
-          ...prev[row][col],
           hasCube: false,
-          claddingEdges: new Set()
+          claddingEdges: new Set(),
+          connections: {
+            entry: null,
+            exit: null
+          }
         };
 
         // Update adjacent cubes to add cladding on the newly exposed sides
         const adjacentPositions = [
-          { r: row-1, c: col, edge: 'bottom' as const },
-          { r: row+1, c: col, edge: 'top' as const },
-          { r: row, c: col-1, edge: 'right' as const },
-          { r: row, c: col+1, edge: 'left' as const }
+          { r: row-1, c: col, edge: 'S' as const },
+          { r: row+1, c: col, edge: 'N' as const },
+          { r: row, c: col-1, edge: 'E' as const },
+          { r: row, c: col+1, edge: 'W' as const }
         ];
 
         adjacentPositions.forEach(({ r, c, edge }) => {
           if (r >= 0 && r < GRID_SIZE && c >= 0 && c < GRID_SIZE && newGrid[r][c].hasCube) {
             newGrid[r][c].claddingEdges.add(edge);
+            // Clear connections when a cube is removed
+            newGrid[r][c].connections = {
+              entry: null,
+              exit: null
+            };
           }
         });
       }
@@ -72,7 +112,7 @@ const useGridState = () => {
     });
   }, []);
 
-  const toggleCladding = useCallback((row: number, col: number, edge: 'top' | 'right' | 'bottom' | 'left') => {
+  const toggleCladding = useCallback((row: number, col: number, edge: 'N' | 'E' | 'S' | 'W') => {
     setGrid(prev => {
       // Only allow toggling if the edge is exposed (no adjacent cube)
       if (hasAdjacentCube(prev, row, col, edge)) {
@@ -106,7 +146,11 @@ const useGridState = () => {
     const newGrid: GridCell[][] = preset.map(row => 
       row.map(cell => ({
         hasCube: cell.hasCube,
-        claddingEdges: new Set(cell.claddingEdges)
+        claddingEdges: new Set(cell.claddingEdges),
+        connections: {
+          entry: cell.connections?.entry || null,
+          exit: cell.connections?.exit || null
+        }
       }))
     );
 

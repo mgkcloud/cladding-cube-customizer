@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { GridCell } from './types';
 import { CladdingVisualizer } from './CladdingVisualizer';
+import { PipelineVisualizer } from './PipelineVisualizer';
 import { hasAdjacentCube } from '@/utils/calculationUtils';
 
 interface GridProps {
   grid: GridCell[][];
   onToggleCell: (row: number, col: number) => void;
-  onToggleCladding: (row: number, col: number, edge: 'top' | 'right' | 'bottom' | 'left') => void;
+  onToggleCladding: (row: number, col: number, edge: 'N' | 'E' | 'S' | 'W') => void;
 }
 
 export const Grid: React.FC<GridProps> = ({ grid, onToggleCell, onToggleCladding }) => {
@@ -23,7 +24,7 @@ export const Grid: React.FC<GridProps> = ({ grid, onToggleCell, onToggleCladding
     onToggleCell(1, 1);
   };
 
-  const handleCladdingToggle = (row: number, col: number, edge: 'top' | 'right' | 'bottom' | 'left') => {
+  const handleCladdingToggle = (row: number, col: number, edge: 'N' | 'E' | 'S' | 'W') => {
     onToggleCladding(row, col, edge);
   };
 
@@ -59,16 +60,24 @@ export const Grid: React.FC<GridProps> = ({ grid, onToggleCell, onToggleCladding
             onClick={() => handleCellClick(rowIndex, colIndex)}
           >
             {cell.hasCube && (
-              <CladdingVisualizer
-                cell={cell}
-                onToggle={(edge) => handleCladdingToggle(rowIndex, colIndex, edge)}
-                isEdgeExposed={{
-                  top: !hasAdjacentCube(grid, rowIndex, colIndex, 'top'),
-                  right: !hasAdjacentCube(grid, rowIndex, colIndex, 'right'),
-                  bottom: !hasAdjacentCube(grid, rowIndex, colIndex, 'bottom'),
-                  left: !hasAdjacentCube(grid, rowIndex, colIndex, 'left')
-                }}
-              />
+              <>
+                <CladdingVisualizer
+                  cell={cell}
+                  onToggle={(edge) => handleCladdingToggle(rowIndex, colIndex, edge)}
+                  isEdgeExposed={{
+                    N: !hasAdjacentCube(grid, rowIndex, colIndex, 'N'),
+                    E: !hasAdjacentCube(grid, rowIndex, colIndex, 'E'),
+                    S: !hasAdjacentCube(grid, rowIndex, colIndex, 'S'),
+                    W: !hasAdjacentCube(grid, rowIndex, colIndex, 'W')
+                  }}
+                />
+                <PipelineVisualizer
+                  cell={cell}
+                  row={rowIndex}
+                  col={colIndex}
+                  grid={grid}
+                />
+              </>
             )}
           </div>
         ))
